@@ -6,7 +6,7 @@ SOURCES=$(wildcard src/**/*.c src/*.c)
 OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
 
 TEST_SRC=$(wildcard tests/*_tests.c)
-TESTS=$(patsubst %.c,%,$(TEST_SRC))
+TESTS=$(patsubst %.c,%.out,$(TEST_SRC))
 
 TARGET=build/libYOUR_LIBRARY.a
 SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
@@ -46,6 +46,7 @@ clean:
 	rm -rf build $(OBJECTS) $(TESTS)
 	rm -f tests/tests.log
 	find . -name "*.gc*" -exec rm {} \;
+	find . -name "*.out*" -exec rm {} \;
 	rm -rf `find . -name "*.dSYM" -print`
 
 # The Install
