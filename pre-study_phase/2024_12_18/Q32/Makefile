@@ -6,7 +6,7 @@ SOURCES=$(wildcard src/**/*.c src/*.c)
 OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
 
 TEST_SRC=$(wildcard tests/*_tests.c)
-TESTS=$(patsubst %.c,%.out,$(TEST_SRC))
+TESTS=$(patsubst %.c,%,$(TEST_SRC))
 
 TARGET=build/libYOUR_LIBRARY.a
 SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
@@ -34,7 +34,7 @@ build:
 # The Unit Tests
 .PHONY: tests
 $(TESTS): %: %.c $(TARGET)
-	$(CC) $(CFLAGS) $< -o $@ $(TARGET) $(LIBS)
+	$(CC) $(CFLAGS) $< -o $@.out $(TARGET) $(LIBS)
 tests: $(TESTS)
 	sh ./tests/runtests.sh
 
