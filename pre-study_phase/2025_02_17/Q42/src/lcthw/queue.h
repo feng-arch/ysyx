@@ -26,7 +26,7 @@ typedef struct Queue
 
 Queue *Queue_create()
 {
-    return calloc(1, sizeof(Queue));
+    return (Queue *)calloc(1, sizeof(Queue));
 }
 void Queue_destroy(Queue *q)
 {
@@ -40,7 +40,7 @@ void Queue_destroy(Queue *q)
 void Queue_send(Queue *q, void *value)
 {
     q->count++;
-    QueueNode *temp = calloc(1, sizeof(QueueNode));
+    QueueNode *temp = (QueueNode *)calloc(1, sizeof(QueueNode));
     temp->value = value;
     if (q->first == NULL)
     {
