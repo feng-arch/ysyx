@@ -15,7 +15,7 @@ typedef struct Stack
 
 Stack *Stack_create()
 {
-    return calloc(1, sizeof(Stack));
+    return (Stack *)calloc(1, sizeof(Stack));
 }
 
 void Stack_destroy(Stack *s)
@@ -35,7 +35,7 @@ void Stack_push(Stack *s, void *value)
         s->value = value;
         return;
     }
-    Stack *temp = calloc(1, sizeof(Stack));
+    Stack *temp = (Stack *)calloc(1, sizeof(Stack));
     temp->value = s->value;
     temp->next = s->next;
     s->value = value;

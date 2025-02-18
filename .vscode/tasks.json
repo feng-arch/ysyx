@@ -10,6 +10,14 @@
             "options": {
                 "cwd": "/home/fengqi/Documents/GitRepos/ysyx/pre-study_phase/2025_02_17/Q42"
             },
+        },
+        {
+            "label": "Q44_build",
+            "type": "shell",
+            "command": "make || true",
+            "options": {
+                "cwd": "/home/fengqi/Documents/GitRepos/ysyx/pre-study_phase/2025_02_18/Q44"
+            },
         }
     ]
 }
