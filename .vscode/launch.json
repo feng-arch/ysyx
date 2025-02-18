@@ -53,6 +53,31 @@
                 }
             ],
             "preLaunchTask": "Q42_build"
+        },
+        {
+            "name": "Q44",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/fengqi/Documents/GitRepos/ysyx/pre-study_phase/2025_02_18/Q44/tests/ring_buffer_tests.out",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "/home/fengqi/Documents/GitRepos/ysyx/pre-study_phase/2025_02_18/Q44",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Q44_build"
         }
 
     ]
