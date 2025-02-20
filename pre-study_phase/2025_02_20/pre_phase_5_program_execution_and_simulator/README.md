@@ -100,3 +100,162 @@ while (!halt)
     inst_cycle();
 }
 ```
+
+### 第一版YEMU
+向YEMU_first.c中加入如下内容
+```c
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+
+
+uint32_t R[32], PC;
+uint8_t M[1024] = {
+    0x13, 0x05, 0x00, 0x00, 0x93, 0x05, 0x10, 0x04, 0x73, 0x00, 0x10, 0x00, 0x13, 0x05,
+    0x10, 0x00, 0x93, 0x05, 0x00, 0x00, 0x73, 0x00, 0x10, 0x00, 0x6f, 0x00, 0x00, 0x00,
+}; //64-Byte memory
+
+
+bool halt = false;
+
+void inst_cycle()
+{
+    uint32_t inst = *(uint32_t *)&M[PC];
+    if (((inst & 0x7f) == 0x13) && ((inst >> 12) & 0x7) == 0)
+    { // addi
+        if (((inst >> 7) & 0x1f) != 0)
+        {
+            R[(inst >> 7) & 0x1f] =
+                R[(inst >> 15) & 0x1f] + (((inst >> 20) & 0x7ff) - ((inst & 0x80000000) ? 4096 : 0));
+        }
+    }
+    else if (inst == 0x00100073)
+    { // ebreak
+        if (R[10] == 0)
+        {
+            putchar(R[11] & 0xff);
+        }
+        else if (R[10] == 1)
+        {
+            halt = true;
+        }
+        else
+        {
+            printf("unsupport ebreak command\n");
+        }
+    }
+    else
+    {
+        printf("unsupported instruction\n");
+    }
+    PC += 4;
+}
+
+int main()
+{
+    PC = 0;
+    R[0] = 0;
+    while (!halt)
+    {
+        inst_cycle();
+    }
+    return 0;
+}
+```
+在shell中执行如下命令
+```shell
+gcc ./YEMU_first.c -o a.out && ./a.out
+```
+### 第二版YEMU
+在第一版YEMU中，我们的程序时写在代码里的，为了让我们的YEMU可以执行其它程序，我们需要在YEMU中读取外部的二进制文件。
+
+向YEMU_second.c中加入如下的内容：
+```c
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <assert.h>
+
+
+uint32_t R[32], PC;
+uint8_t M[1024]; //1024-Byte memory
+
+
+bool halt = false;
+
+void inst_cycle()
+{
+    uint32_t inst = *(uint32_t *)&M[PC];
+    if (((inst & 0x7f) == 0x13) && ((inst >> 12) & 0x7) == 0)
+    { // addi
+        if (((inst >> 7) & 0x1f) != 0)
+        {
+            R[(inst >> 7) & 0x1f] =
+                R[(inst >> 15) & 0x1f] + (((inst >> 20) & 0x7ff) - ((inst & 0x80000000) ? 4096 : 0));
+        }
+    }
+    else if (inst == 0x00100073)
+    { // ebreak
+        if (R[10] == 0)
+        {
+            putchar(R[11] & 0xff);
+        }
+        else if (R[10] == 1)
+        {
+            halt = true;
+        }
+        else
+        {
+            printf("unsupport ebreak command\n");
+        }
+    }
+    else
+    {
+        printf("unsupported instruction\n");
+    }
+    PC += 4;
+}
+
+int main(int argc, char* argv[])
+{
+    PC = 0;
+    R[0] = 0;
+    assert(argc >= 2);
+    FILE *fp = fopen(argv[1], "r");
+    assert(fp != NULL);
+    int ret = fseek(fp, 0, SEEK_END);
+    assert(ret != -1);
+    long fsize = ftell(fp);
+    assert(fsize != -1);
+    rewind(fp);
+    assert(fsize < 1024);
+    ret = fread(M, 1, 1024, fp);
+    assert(ret == fsize);
+    fclose(fp);
+    while (!halt)
+    {
+        inst_cycle();
+    }
+    return 0;
+}
+```
+然后将之前编译的prog.out复制到YEMU的目录下，运行下面的命令
+
+![](https://feng-arch.cn/wp-content/uploads/2025/02/1740041649-YEMU_1.png)
+
+现在让我们试试更加复杂的程序，将**_start()**换成下面的代码
+```c
+void _start() {
+  putch('H'); putch('e'); putch('l'); putch('l'); putch('o'); putch(','); putch(' ');
+  putch('R'); putch('I'); putch('S'); putch('C'); putch('-'); putch('V'); putch('!');
+  putch('\n');
+  halt(0);
+}
+```
+在shell中执行下面的命令，我们就可以使用YEMU输出"Hello, RISC-V"。
+```shell
+riscv64-unknown-elf-gcc -ffreestanding -nostdlib -static -Wl,-Ttext=0 -O2 -march=rv64g -mabi=lp64 -o prog.out ./more_complex_program.c
+riscv64-unknown-elf-objcopy -j .text -O binary prog.out prog.bin
+./a.out ./prog.bin
+```
+
