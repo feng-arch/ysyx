@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "yemu.h"
+
+#define MSIZE 1024
 
 
 #define Assert(cond, format, ...)                                                                                      \
